@@ -1,0 +1,39 @@
+#new_party{
+	display: inline-block;
+	vertical-align: top;
+}
+
+#new_user{
+	display: inline-block;
+	vertical-align: top;
+}
+
+div{
+	margin: 10px;
+}
+
+input[ng-model='new_party.name'], input[ng-model='new_user.name']{
+	margin-left: 35px;
+}
+
+input[ng-model='new_user.age']{
+	margin-left: 47px;
+}
+
+input[type='submit']{
+	margin-left: 155px;
+}
+
+table{
+	margin-top: 20px;
+	border-collapse: collapse;
+}
+
+th, td{
+	border: 1px solid;
+	padding: 5px 10px;
+}
+
+tr:nth-child(even){
+	background-color: gray;
+}

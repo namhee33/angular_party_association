@@ -1,0 +1,31 @@
+<div id='new_party' ng-controller='partiesController'>
+	<h2>New Party</h2>
+	<form ng-submit='addParty()'>
+		<div> Name <input type='text' ng-model='new_party.name'></div>
+		<div>Description <input type='text' ng-model='new_party.desc'></div>
+		<input type='submit' value='Add New Party'>
+	</form>
+</div>
+<div id='new_user' ng-controller='usersController'>
+	<h2>New User</h2>
+	<form ng-submit='addUser()'>
+		<div> Name <input type='text' ng-model='new_user.name'></div>
+		<div>Age <input type='number' min='1' ng-model='new_user.age'></div>
+		<input type='submit' value='Add New User'>
+	</form>
+</div>
+<div id='party_list' ng-controller = 'partiesController'>
+	 <table>
+        <tr>
+            <th>Party Name</th>
+            <th>Description</th>
+            <th>Attending #</th>
+        </tr>
+
+        <tr ng-repeat="party in parties">
+        	<td><a href="#/party/{{party.name}}">{{party.name}}</a> </td>
+        	<td>{{party.desc}}</td>
+        	<td>{{party.users.length}}</td>
+        </tr>
+    </table>
+</div>

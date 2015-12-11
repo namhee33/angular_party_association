@@ -1,0 +1,207 @@
+<html lang="en" ng-app="myApp">
+	<head>
+		<meta charset="UTF-8">
+		<title>Document</title>
+		<link rel='stylesheet' href='style.css'>
+		<script type="text/javascript" src="angular.js"></script>
+		<script type="text/javascript" src="angular-route.js"></script>
+		<script type="text/javascript">
+			var myApp = angular.module('myApp', ['ngRoute']);
+			myApp.config(function($routeProvider){
+				$routeProvider
+				.when('/', {
+					redirectTo: '/main'
+				})
+				.when('/main', {
+					templateUrl: 'partials/main.partial.html',
+					
+				})
+				.when('/party/:party_name', {
+					templateUrl: 'partials/party.partial.html',
+					controller: 'assController'
+				})
+				.otherwise({
+                    redirectTo: '/'
+                });
+			});
+
+			myApp.factory('partyFactory', function(){
+				var factory = {};
+				var parties = [];
+				factory.getParties = function(callback){
+					callback(parties);
+				}
+
+				factory.addParty = function(data, callback){
+					console.log('add party: ', data);
+					parties.push(data);
+				}
+				factory.removeParty = function(data, callback){
+					console.log('remove party: ', data);
+					parties.splice(parties.indexOf(data),1);
+				}
+				factory.find_party_by_name = function(party_name, callback){
+					for(var i=0;i<parties.length;i++){
+						if(parties[i].name == party_name)
+							 callback(parties[i]);
+					}	
+				}
+				return factory;
+
+			});
+			myApp.factory('userFactory', function(){
+				var factory = {};
+				var users = [];
+				factory.getUsers = function(callback){
+					callback(users);
+				}
+
+				factory.addUser = function(data, callback){
+					console.log('add User: ', data);
+					users.push(data);
+				}
+				
+				return factory;
+			});
+			myApp.factory('assFactory', function(){
+				var factory = {};
+				var associates = [];
+				var waitingList = [];
+				var currentAss = {};
+
+				
+				factory.getAssociates = function(callback){
+					callback(associates);
+				}
+
+				factory.addAss = function(user, party, callback){
+					console.log('add party: ', party, 'add user: ', user);
+
+					if(associates[party.name]){
+						if(associates[party.name].indexOf(user) == -1){
+							associates[party.name].push(user);
+						}
+					}else{
+						associates[party.name] = [user];
+					}
+					console.log('### after add Ass: ', associates[party.name]);
+					console.log('### after add Ass Objects: ', associates);
+				
+					waitingList.splice(waitingList.indexOf(user),1);
+					callback();
+				}
+
+				factory.removeAss = function(user, party, callback){
+					console.log('remove party: ', party, 'remove user: ', user);
+					associates[party.name].splice(associates[party.name].indexOf(user),1);
+					waitingList.push(user);
+					callback();
+				}
+
+				factory.setWaitingList = function(wList){
+					waitingList = wList;
+				}
+				factory.getWaitingList = function(callback){
+					callback(waitingList);
+				}
+
+				return factory;
+			});
+
+			myApp.controller('usersController', function(userFactory, $scope){
+				$scope.users;
+
+				$scope.index = function(){
+					userFactory.getUsers(function(data){
+						$scope.users = data;
+					})
+				};
+
+				$scope.index();
+				$scope.addUser = function(){
+					console.log('new user from controller', $scope.new_user);
+					userFactory.addUser($scope.new_user, $scope.index);
+					$scope.new_user = {};
+				};
+			});
+
+			myApp.controller('partiesController', function(partyFactory, $scope){
+				$scope.parties;
+
+				$scope.index = function(){
+					partyFactory.getParties(function(data){
+						$scope.parties = data;
+					})
+				};
+
+				$scope.index();
+				$scope.addParty = function(){
+					console.log('new party from controller', $scope.new_party);
+					
+					partyFactory.addParty($scope.new_party, $scope.index);
+					$scope.new_party = {};
+				};
+
+				$scope.removeParty = function(party){
+					partyFactory.removeParty(party, $scope.index);
+				};
+			});
+
+			myApp.controller('assController', function(userFactory, partyFactory, assFactory, $scope, $routeParams){
+				$scope.party_name = $routeParams.party_name;
+				$scope.waitingList = [];
+				$scope.associates;
+
+				console.log('party name from parameter!!! ', $scope.party_name);
+
+				partyFactory.find_party_by_name($scope.party_name, function(data){
+					$scope.current_party = data;
+					console.log('found current party: ', $scope.current_party);
+				});
+
+
+				// make a waitingList who didn't join the party
+				userFactory.getUsers(function(data){
+					$scope.allUsers = data;
+				});
+
+				assFactory.getAssociates(function(data){
+					$scope.associates = data;
+				})
+
+				for(var i=0;i<$scope.allUsers.length;i++){
+					if($scope.associates[$scope.party_name]){
+						if($scope.associates[$scope.party_name].indexOf($scope.allUsers[i]) == -1)
+							$scope.waitingList.push($scope.allUsers[i]);
+					}else{
+						$scope.waitingList.push($scope.allUsers[i]);
+					}
+				}
+				console.log('waitingList!! ', $scope.waitingList);
+				assFactory.setWaitingList($scope.waitingList);
+
+				// get updated watingList from assFactory and throw them into the table
+				assFactory.getWaitingList(function(data){
+					$scope.updated_waitingList = data;
+				});
+
+				$scope.addAss = function(user, player){
+						assFactory.addAss(user, player, function(){
+							console.log('add new associations: ',user, player);
+						});	
+				};
+
+				$scope.removeAss = function(user, player){
+						assFactory.removeAss(user, player, function(){
+							console.log('remove associations: ', user, player);
+						});	
+				};
+			});
+
+		</script>
+	</head>
+	<body ng-app='myApp'>
+		<a href='#/main'>Main</a> | <a href='#/party'>About Party</a>
+		<div ng-view></div>
+	</body>
+</html>

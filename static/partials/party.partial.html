@@ -1,0 +1,30 @@
+<div ng-controller='assController'>
+	<h2>Party Invitation</h2>
+	<h3>Party Name: {{current_party.name}} </h3>
+	<h3>Party Description: {{current_party.desc}} </h3>
+
+	<h2>Party Attendees</h2>
+	<table>
+        <tr>
+            <th>User Name</th>
+            <th>Action</th>    
+        </tr>
+        <tr ng-repeat="user in associates[current_party.name]">
+        	<td>{{user.name}}</a> </td>
+        	<td><button ng-click='removeAss(user, current_party)'>remove</button></td>
+        </tr>
+    </table>
+
+    <h2>Party Invitation</h2>
+	<table>
+        <tr>
+            <th>User Name</th>
+            <th>Action</th>    
+        </tr>
+        <tr ng-repeat="user in updated_waitingList">
+        	<td>{{user.name}}</a> </td>
+        	<td><button ng-click='addAss(user, current_party)'>Add</button></td>
+        </tr>
+    </table>
+</div>
+
